@@ -24,6 +24,13 @@ export const BINANCE_NETWORKS = {
 };
 
 /**
+ * moonbeam网络
+ */
+export const MOONBEAM_NETWORKS = {
+    1287: "MOONBEAMTEST"
+};
+
+/**
  * 主网网络
  */
 export const MAINNET_NETWORKS = {
@@ -37,6 +44,7 @@ export const MAINNET_NETWORKS = {
 export const TESTNET_NETWORKS = {
     3: "ROPSTEN",
     97: "BSCTESTNET"
+    // 1287: "MOONBEAMTEST"
 };
 
 export const isEthereumNetwork = walletNetworkId => {
@@ -45,6 +53,10 @@ export const isEthereumNetwork = walletNetworkId => {
 
 export const isBinanceNetwork = walletNetworkId => {
     return BINANCE_NETWORKS.hasOwnProperty(walletNetworkId);
+};
+
+export const isMoonbeamNetwork = walletNetworkId => {
+    return MOONBEAM_NETWORKS.hasOwnProperty(walletNetworkId);
 };
 
 export const isMainnetNetwork = walletNetworkId => {
@@ -69,13 +81,18 @@ export const getOtherNetworks = walletNetworkId => {
     return other;
 };
 
-export const SUPPORTED_NETWORKS = { ...ETHEREUM_NETWORKS, ...BINANCE_NETWORKS };
+export const SUPPORTED_NETWORKS = {
+    ...ETHEREUM_NETWORKS,
+    ...BINANCE_NETWORKS,
+    ...MOONBEAM_NETWORKS
+};
 
 export const SUPPORTED_NETWORKS_MAP = _.invert(SUPPORTED_NETWORKS);
 
 export const SUPPORTED_WALLETS_MAP = {
     METAMASK: "MetaMask",
     BINANCE_CHAIN: "BinanceChain",
+    MOONBEAM: "Moonbeam",
     WALLET_CONNECT: "WalletConnect"
 };
 
@@ -96,7 +113,8 @@ export const BLOCKCHAIN_BROWSER = {
     1: "https://etherscan.io/tx/",
     3: "https://ropsten.etherscan.io/tx/",
     56: "https://bscscan.com/tx/",
-    97: "https://testnet.bscscan.com/tx/"
+    97: "https://testnet.bscscan.com/tx/",
+    1287: "https://moonbeam-explorer.netlify.app/block/"
 };
 
 export const BLOCKCHAIN_BROWSER_API = {
@@ -112,7 +130,6 @@ export const DEOSIT_PROOF_API = {
     56: process.env.DEOSIT_PROOF_MAINNET_API,
     97: process.env.DEOSIT_PROOF_TESTNET_API
 };
-
 
 /**
  * 链切换类型
@@ -247,6 +264,22 @@ export const getNetworkSpeeds = async walletNetworkId => {
         if (res?.result) {
             currentGasPrice = unFormatGasPrice(res.result);
         }
+        return {
+            [NETWORK_SPEEDS_TO_KEY.SLOW]: {
+                price: currentGasPrice * 0.75,
+                time: 1
+            },
+            [NETWORK_SPEEDS_TO_KEY.MEDIUM]: {
+                price: currentGasPrice,
+                time: 0.5
+            },
+            [NETWORK_SPEEDS_TO_KEY.FAST]: {
+                price: currentGasPrice * 1.25,
+                time: 0.2
+            }
+        };
+    }else if (isMoonbeamNetwork(walletNetworkId)) {
+        let currentGasPrice = 1;
         return {
             [NETWORK_SPEEDS_TO_KEY.SLOW]: {
                 price: currentGasPrice * 0.75,

@@ -220,6 +220,7 @@ import {
     getOtherNetworks,
     isBinanceNetwork,
     isEthereumNetwork,
+    isMoonbeamNetwork,
     SUPPORTED_WALLETS_MAP
 } from "@/assets/linearLibrary/linearTools/network";
 import lnrJSConnector, {
@@ -295,7 +296,8 @@ export default {
         },
 
         isBinanceNetwork() {
-            return isBinanceNetwork(this.walletNetworkId);
+            return isBinanceNetwork(this.walletNetworkId) ||
+                isMoonbeamNetwork(this.walletNetworkId);
         },
 
         walletNetworkId() {
@@ -371,6 +373,7 @@ export default {
                 await this.filterCurrencies();
                 // await this.getCurrencyBalance();
             } catch (error) {
+                console.log(error,'initData');
                 this.processing = false;
             }
         },

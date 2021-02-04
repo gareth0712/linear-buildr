@@ -544,6 +544,7 @@ import {
     CHAIN_CHANGE_TYPE,
     isBinanceNetwork,
     isEthereumNetwork,
+    isMoonbeamNetwork,
     SUPPORTED_WALLETS_MAP
 } from "@/assets/linearLibrary/linearTools/network";
 import lnrJSConnector, {
@@ -599,7 +600,10 @@ export default {
         },
 
         isBinanceNetwork() {
-            return isBinanceNetwork(this.walletNetworkId);
+            return (
+                isBinanceNetwork(this.walletNetworkId) ||
+                isMoonbeamNetwork(this.walletNetworkId)
+            );
         },
 
         walletNetworkId() {

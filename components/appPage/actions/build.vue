@@ -446,7 +446,8 @@ import {
     bufferGasLimit,
     DEFAULT_GAS_LIMIT,
     isBinanceNetwork,
-    isEthereumNetwork
+    isEthereumNetwork,
+    isMoonbeamNetwork
 } from "@/assets/linearLibrary/linearTools/network";
 
 import {
@@ -582,7 +583,10 @@ export default {
         },
 
         isBinanceNetwork() {
-            return isBinanceNetwork(this.walletNetworkId);
+            return (
+                isBinanceNetwork(this.walletNetworkId) ||
+                isMoonbeamNetwork(this.walletNetworkId)
+            );
         },
 
         walletNetworkId() {

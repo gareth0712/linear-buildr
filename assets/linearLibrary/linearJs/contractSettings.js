@@ -5,7 +5,8 @@ const SUPPORTED_NETWORKS = {
     1: "mainnet",
     3: "ropsten",
     56: "bscmainnet",
-    97: "bsctestnet"
+    97: "bsctestnet",
+    1287: "moonbeamtest"
 };
 
 const API_KEY = {
@@ -30,6 +31,9 @@ class ContractSettings {
                 case 97: //BSC测试网RPC
                     tempNetwork =
                         "https://data-seed-prebsc-1-s1.binance.org:8545/";
+                    break;
+                case 1287: //moonbeam测试网RPC
+                    tempNetwork = "https://rpc.testnet.moonbeam.network/";
                     break;
             }
             this.provider = getDefaultProvider(tempNetwork, API_KEY);

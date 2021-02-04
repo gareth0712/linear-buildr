@@ -7,11 +7,13 @@ import {
     onBinanceAccountChange,
     onBinanceChainChange,
     onMetamaskChainChange,
-    CHAIN_CHANGE_TYPE
+    CHAIN_CHANGE_TYPE,
+    SUPPORTED_NETWORKS
 } from "./network";
 import { LinearJs } from "../linearJs";
 import $pub from "pubsub-js";
 import { storeDetailsData } from "./request";
+
 
 let lnrJSConnector = {
     signers: LinearJs.signers,
@@ -35,9 +37,7 @@ export const connectToWallet = async networkType => {
 
         const { name, networkId } = network;
 
-        //  [1, 56].includes(networkId)
-
-        if (!name) {
+        if (!SUPPORTED_NETWORKS[networkId]) {
             throw new Error("not support network");
         }
 

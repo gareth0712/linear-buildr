@@ -20,13 +20,8 @@
                                 <img
                                     v-if="feesAreClaimable"
                                     src="@/static/LINA_logo.svg"
-                                    
                                 />
-                                <img
-                                    v-else
-                                    src="@/static/LINA_gray_logo.svg"
-                                    
-                                />
+                                <img v-else src="@/static/LINA_gray_logo.svg" />
                                 <div class="title">Staking Rewards</div>
                                 <div class="amount">
                                     <span>{{ stakingRewards }}</span> LINA
@@ -37,13 +32,8 @@
                                 <img
                                     v-if="feesAreClaimable"
                                     src="@/static/currency/lUSD.svg"
-                                    
                                 />
-                                <img
-                                    v-else
-                                    src="@/static/LUSD_gray_logo.svg"
-                                    
-                                />
+                                <img v-else src="@/static/LUSD_gray_logo.svg" />
                                 <div class="title">Exchange Rewards</div>
                                 <div class="amount">
                                     <span>{{ tradingRewards }}</span> ℓUSD
@@ -61,13 +51,12 @@
                                         content="Reward can only be claimed when target ratio is reached."
                                         placement="top"
                                     >
-                                        <img src="@/static/info_white.svg"  />
+                                        <img src="@/static/info_white.svg" />
                                     </Tooltip>
 
                                     <img
                                         class="showInfoMobile"
                                         src="@/static/info_white.svg"
-                                        
                                         @click="showIntroductActionModal"
                                     />
                                 </div>
@@ -167,7 +156,8 @@ import {
     DEFAULT_GAS_LIMIT,
     isBinanceNetwork,
     isEthereumNetwork,
-    isMainnetNetwork
+    isMainnetNetwork,
+    isMoonbeamNetwork
 } from "@/assets/linearLibrary/linearTools/network";
 import { BigNumber, utils } from "ethers";
 import { BUILD_PROCESS_SETUP } from "@/assets/linearLibrary/linearTools/constants/process";
@@ -211,7 +201,10 @@ export default {
         },
 
         isBinanceNetwork() {
-            return isBinanceNetwork(this.walletNetworkId);
+            return (
+                isBinanceNetwork(this.walletNetworkId) ||
+                isMoonbeamNetwork(this.walletNetworkId)
+            );
         },
 
         walletNetworkName() {
