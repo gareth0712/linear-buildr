@@ -1,0 +1,1 @@
+zip -q -r dist.zip ./dist/

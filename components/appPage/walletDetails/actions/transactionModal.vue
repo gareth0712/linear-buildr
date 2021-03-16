@@ -29,11 +29,11 @@
                         placeholder="All Chains"
                     >
                         <Option value="ethereum" label="Ethereum">
-                            <img src="@/static/ETH.svg"  />
+                            <img src="@/static/ETH.svg" />
                             <span>Ethereum</span>
                         </Option>
                         <Option value="binance" label="Binance">
-                            <img src="@/static/binance.svg"  />
+                            <img src="@/static/binance.svg" />
                             <span> Binance</span>
                         </Option>
                     </Select>
@@ -177,9 +177,12 @@
             </div>
 
             <div class="filterMenuMobile" v-if="isMobile">
-                <img src="@/static/add.svg"  @click="showFilterMenuMobileModal">
+                <img
+                    src="@/static/add.svg"
+                    @click="showFilterMenuMobileModal"
+                />
                 <template v-if="filterNum != 0">
-                    {{filterNum}} Filters applied
+                    {{ filterNum }} Filters applied
                 </template>
                 <template v-if="filterNum == 0">
                     Filter
@@ -302,7 +305,7 @@
         </div>
 
         <div v-else class="noTransactionBox">
-            <img src="@/static/no_transaction.svg"  />
+            <img src="@/static/no_transaction.svg" />
             <div class="title">No Transactions</div>
             <div class="context">You have not made any transactions yet</div>
             <div class="buildBtn" @click="toBuild()">Build ℓUSD</div>
@@ -347,11 +350,11 @@
                     placeholder="All Chains"
                 >
                     <Option value="ethereum" label="Ethereum">
-                        <img src="@/static/ETH.svg"  />
+                        <img src="@/static/ETH.svg" />
                         <span>Ethereum</span>
                     </Option>
                     <Option value="binance" label="Binance">
-                        <img src="@/static/binance.svg"  />
+                        <img src="@/static/binance.svg" />
                         <span> Binance</span>
                     </Option>
                 </Select>
@@ -786,18 +789,13 @@ export default {
             );
 
             //获取其他网络graph数据
-            const other = getOtherNetworks(this.walletNetworkId);
-            if (other.length) {
-                for (const index in other) {
-                    const id = other[index];
-                    waitArray.push(
-                        fetchTransactionHistory(
-                            this.$store.state?.wallet?.address,
-                            id
-                        )
-                    );
-                }
-            }
+            const otherNetworkId = getOtherNetworks(this.walletNetworkId);
+            waitArray.push(
+                fetchTransactionHistory(
+                    this.$store.state?.wallet?.address,
+                    otherNetworkId
+                )
+            );
 
             const [one, two] = await Promise.all(waitArray);
             this.transactionHistoryData = [...one, ...two];
@@ -1312,7 +1310,7 @@ body {
                                 color: #5a575c;
                                 padding: 5px;
                                 height: 100%;
-                                word-break: keep-all!important;
+                                word-break: keep-all !important;
 
                                 &:first-of-type {
                                     padding-left: 16px;
@@ -1759,9 +1757,9 @@ body {
                 justify-content: center;
 
                 .ivu-modal {
-                    width: 100%!important;
+                    width: 100% !important;
                     height: 100%;
-                    top: 0!important;
+                    top: 0 !important;
                     margin: 0;
 
                     .ivu-modal-content {
@@ -2011,7 +2009,7 @@ body {
                                     font-size: 12px;
                                     text-align: center;
                                     color: #ffffff;
-                                    background-color:rgba(126,181,255,.2);
+                                    background-color: rgba(126, 181, 255, 0.2);
                                     border-radius: 20px;
                                     letter-spacing: 1.5px;
                                 }

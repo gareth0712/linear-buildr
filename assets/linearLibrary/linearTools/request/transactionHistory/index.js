@@ -2,7 +2,6 @@ import linearData from "../linearData/transactionData";
 import flatten from "lodash/flatten";
 import _ from "lodash";
 import { isBinanceNetwork, isEthereumNetwork } from "../../network";
-import currencies from "@/common/currency";
 
 export const PAGINATION_INDEX = 10;
 

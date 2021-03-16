@@ -12,7 +12,8 @@ import api from "@/api";
  */
 export const ETHEREUM_NETWORKS = {
     1: "MAINNET",
-    3: "ROPSTEN"
+    3: "ROPSTEN",
+    10001: "ETHDEV"
 };
 
 /**
@@ -20,7 +21,8 @@ export const ETHEREUM_NETWORKS = {
  */
 export const BINANCE_NETWORKS = {
     56: "BSCMAINNET",
-    97: "BSCTESTNET"
+    97: "BSCTESTNET",
+    10056: "BSCDEV"
 };
 
 /**
@@ -36,7 +38,34 @@ export const MAINNET_NETWORKS = {
  */
 export const TESTNET_NETWORKS = {
     3: "ROPSTEN",
+    97: "BSCTESTNET",
+    10001: "ETHDEV",
+    10056: "BSCDEV"
+};
+
+export const ETHDEV_NETWORKS = {
+    10001: "ETHDEV"
+};
+
+export const BSCDEV_NETWORKS = {
+    10056: "BSCDEV"
+};
+
+export const DEV_NETWORKS = { ...ETHDEV_NETWORKS, ...BSCDEV_NETWORKS };
+
+const MAINNET_RELATIVE_NETWORKS = {
+    1: "MAINNET",
+    56: "BSCMAINNET"
+};
+
+const TESTNET_RELATIVE_NETWORKS = {
+    3: "ROPSTEN",
     97: "BSCTESTNET"
+};
+
+const DEV_RELATIVE_NETWORKS = {
+    10001: "ETHDEV",
+    10056: "BSCDEV"
 };
 
 export const isEthereumNetwork = walletNetworkId => {
@@ -55,6 +84,18 @@ export const isTestnetNetwork = walletNetworkId => {
     return TESTNET_NETWORKS.hasOwnProperty(walletNetworkId);
 };
 
+export const isDevNetwork = walletNetworkId => {
+    return DEV_NETWORKS.hasOwnProperty(walletNetworkId);
+};
+
+export const isEthDevNetwork = walletNetworkId => {
+    return ETHDEV_NETWORKS.hasOwnProperty(walletNetworkId);
+};
+
+export const isBscDevNetwork = walletNetworkId => {
+    return BSCDEV_NETWORKS.hasOwnProperty(walletNetworkId);
+};
+
 /**
  * 获取所在网络其他网络id
  * @param walletNetworkId 网络Id
@@ -62,11 +103,17 @@ export const isTestnetNetwork = walletNetworkId => {
 export const getOtherNetworks = walletNetworkId => {
     let other = [];
     if (isMainnetNetwork(walletNetworkId)) {
-        other = Object.keys(_.omit(MAINNET_NETWORKS, [walletNetworkId]));
+        other = Object.keys(
+            _.omit(MAINNET_RELATIVE_NETWORKS, [walletNetworkId])
+        );
+    } else if (isDevNetwork(walletNetworkId)) {
+        other = Object.keys(_.omit(DEV_RELATIVE_NETWORKS, [walletNetworkId]));
     } else if (isTestnetNetwork(walletNetworkId)) {
-        other = Object.keys(_.omit(TESTNET_NETWORKS, [walletNetworkId]));
+        other = Object.keys(
+            _.omit(TESTNET_RELATIVE_NETWORKS, [walletNetworkId])
+        );
     }
-    return other;
+    return other.join();
 };
 
 export const SUPPORTED_NETWORKS = { ...ETHEREUM_NETWORKS, ...BINANCE_NETWORKS };
@@ -96,21 +143,27 @@ export const BLOCKCHAIN_BROWSER = {
     1: "https://etherscan.io/tx/",
     3: "https://ropsten.etherscan.io/tx/",
     56: "https://bscscan.com/tx/",
-    97: "https://testnet.bscscan.com/tx/"
+    97: "https://testnet.bscscan.com/tx/",
+    10001: "https://master.explorer.eth.dev.linear.finance/tx/",
+    10056: "https://master.explorer.bsc.dev.linear.finance/tx/"
 };
 
 export const BLOCKCHAIN_BROWSER_API = {
     1: "https://api.etherscan.io/api",
     3: "https://api-ropsten.etherscan.io/api",
     56: "https://api.bscscan.com/api",
-    97: "https://api-testnet.bscscan.com/api"
+    97: "https://api-testnet.bscscan.com/api",
+    10001: "https://master.explorer.eth.dev.linear.finance/api",
+    10056: "https://master.explorer.bsc.dev.linear.finance/api"
 };
 
 export const TOKEN_BRIDGE_API = {
     1: process.env.TOKEN_BRIDGE_MAINNET,
     3: process.env.TOKEN_BRIDGE_TESTNET,
     56: process.env.TOKEN_BRIDGE_MAINNET,
-    97: process.env.TOKEN_BRIDGE_TESTNET
+    97: process.env.TOKEN_BRIDGE_TESTNET,
+    10001: process.env.TOKEN_BRIDGE_DEV,
+    10056: process.env.TOKEN_BRIDGE_DEV
 };
 
 /**
@@ -210,7 +263,22 @@ export async function getBinanceNetwork() {
 export const getNetworkSpeeds = async walletNetworkId => {
     !walletNetworkId && (walletNetworkId = $nuxt.$store.state?.walletNetworkId);
 
-    if (isEthereumNetwork(walletNetworkId)) {
+    if (isDevNetwork(walletNetworkId)) {
+        return {
+            [NETWORK_SPEEDS_TO_KEY.SLOW]: {
+                price: 10,
+                time: 1
+            },
+            [NETWORK_SPEEDS_TO_KEY.MEDIUM]: {
+                price: 15,
+                time: 0.5
+            },
+            [NETWORK_SPEEDS_TO_KEY.FAST]: {
+                price: 20,
+                time: 0.2
+            }
+        };
+    } else if (isEthereumNetwork(walletNetworkId)) {
         let result = await fetch(URLS.ETH_GAS_STATION, {
             headers: {
                 "Content-Type": "application/json",

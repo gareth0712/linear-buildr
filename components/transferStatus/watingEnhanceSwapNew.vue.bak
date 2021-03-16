@@ -1185,7 +1185,7 @@ export default {
 
             this.targetNetworkId = getOtherNetworks(
                 this.walletNetworkId
-            ).join();
+            );
             const sourceStep = isEthereumNetwork(this.walletNetworkId)
                 ? "Checking the amount of ETH on Metamask"
                 : isBinanceNetwork(this.walletNetworkId)
@@ -1260,7 +1260,7 @@ export default {
                 //记录目标网络id
                 this.targetNetworkId = getOtherNetworks(
                     this.walletNetworkId
-                ).join();
+                );
 
                 //记录原始钱包地址
                 this.sourceWalletAddress = this.walletAddress.toLocaleLowerCase();
@@ -1415,7 +1415,7 @@ export default {
                     // //记录目标网络id
                     // this.targetNetworkId = getOtherNetworks(
                     //     this.walletNetworkId
-                    // ).join();
+                    // );
 
                     // //记录原始钱包地址
                     // this.sourceWalletAddress = this.walletAddress.toLocaleLowerCase();

@@ -468,7 +468,7 @@ export default {
             ? "ETH"
             : this.isBinanceNetwork
             ? "BNB"
-            : "ETH";
+            : "BNB";
         //获取ETH gas limit评估
         let ethGasLimit = await this.getGasEstimate(
             currency,

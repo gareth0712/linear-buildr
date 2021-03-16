@@ -1,7 +1,7 @@
 import * as ethers from "ethers";
 
 import MetaMask from "./lib/signers/metamaskSigner";
-import BinanceChain  from "./lib/signers/binanceSigner";
+import BinanceChain from "./lib/signers/binanceSigner";
 import WalletConnect from "./lib/signers/walletConnectSigner";
 import PrivateKey from "./lib/signers/privateKeySigner";
 import ContractSettings from "./contractSettings";
@@ -10,7 +10,7 @@ import util from "./util";
 
 const signers = {
     MetaMask,
-    BinanceChain ,
+    BinanceChain,
     WalletConnect,
     PrivateKey
 };

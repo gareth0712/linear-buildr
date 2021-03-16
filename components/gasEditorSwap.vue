@@ -484,11 +484,10 @@ export default {
                 SOURCE: "source",
                 TARGET: "target"
             },
-            chainChangeTokenFromSubscribe: null,
+            chainChangeTokenFromSubscribe: null
 
             // isEthereumNetworkFunc: isEthereumNetwork,
             // isBinanceNetworkFunc: isBinanceNetwork,
-
         };
     },
     filters: {
@@ -646,9 +645,7 @@ export default {
                     targetNetworkId;
 
                 targetNetwork &&
-                    (targetNetworkId = getOtherNetworks(
-                        this.walletNetworkId
-                    ).join());
+                    (targetNetworkId = getOtherNetworks(this.walletNetworkId));
 
                 if (sourceNetwork) {
                     await getNetworkSpeeds(sourceNetworkId)
@@ -836,9 +833,7 @@ export default {
 
         //设置gas
         setTargetGasDetails(price, type) {
-            const targetNetworkId = getOtherNetworks(
-                this.walletNetworkId
-            ).join();
+            const targetNetworkId = getOtherNetworks(this.walletNetworkId);
             this.$store.commit("setTargetGasDetails", {
                 price: formatGasPrice(price),
                 type,

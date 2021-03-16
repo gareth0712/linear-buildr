@@ -631,7 +631,8 @@ import {
     unFormatGasPrice,
     getBinanceNetwork,
     getEthereumNetwork,
-    isTestnetNetwork
+    isTestnetNetwork,
+    isDevNetwork
 } from "@/assets/linearLibrary/linearTools/network";
 import api from "@/api";
 import lnrJSConnector from "@/assets/linearLibrary/linearTools/lnrJSConnector";
@@ -814,9 +815,7 @@ export default {
         initStep() {
             this.checkStatus.stepArray = [];
 
-            this.targetNetworkId = getOtherNetworks(
-                this.walletNetworkId
-            ).join();
+            this.targetNetworkId = getOtherNetworks(this.walletNetworkId);
             const sourceStep = isEthereumNetwork(this.walletNetworkId)
                 ? "Checking the amount of ETH on Metamask"
                 : isBinanceNetwork(this.walletNetworkId)
@@ -869,9 +868,7 @@ export default {
                 this.sourceNetworkId = this.walletNetworkId;
 
                 //记录目标网络id
-                this.targetNetworkId = getOtherNetworks(
-                    this.walletNetworkId
-                ).join();
+                this.targetNetworkId = getOtherNetworks(this.walletNetworkId);
 
                 //记录原始钱包地址
                 this.sourceWalletAddress = this.walletAddress.toLocaleLowerCase();
@@ -894,7 +891,10 @@ export default {
                 this.targetWalletType = SUPPORTED_WALLETS_MAP.METAMASK;
 
                 if (currentStep < 2) {
-                    await this.checkTargetBalace();
+                    //不是测试链,检查目标网络钱包余额
+                    if (!isDevNetwork(this.targetNetworkId)) {
+                        await this.checkTargetBalace();
+                    }
                     if (this.checkStatus.stepType != -1) return;
 
                     await this.checkContract();

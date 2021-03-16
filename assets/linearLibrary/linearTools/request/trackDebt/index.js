@@ -9,7 +9,7 @@ export const fetchTrackDebt = async walletAddress => {
     try {
         let otherNetWorkId = getOtherNetworks(
             $nuxt.$store.state?.walletNetworkId
-        ).join();
+        );
 
         let [
             minted,

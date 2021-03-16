@@ -378,7 +378,7 @@ export default {
             } catch (error) {
                 this.initCurrencies();
                 this.selectCurrencyKey = "LINA";
-                console.log("initData error",error);
+                console.log("initData error", error);
                 this.processing = false;
             }
         },
@@ -393,7 +393,6 @@ export default {
                 ),
                 getLiquids(this.walletAddress, true)
             ]);
-
 
             let liquidsList = liquids.liquidsList.map(item => {
                 const key = item.name;
@@ -424,7 +423,7 @@ export default {
         //过滤无余额的token
         async filterCurrencies() {
             //获取其他网络id
-            let otherNetworkId = getOtherNetworks(this.walletNetworkId).join();
+            let otherNetworkId = getOtherNetworks(this.walletNetworkId);
 
             let keyMap = this.currencies.map(item => item.key);
 
@@ -488,9 +487,7 @@ export default {
                 this.processing = true;
 
                 //获取其他网络id
-                let otherNetworkId = getOtherNetworks(
-                    this.walletNetworkId
-                ).join();
+                let otherNetworkId = getOtherNetworks(this.walletNetworkId);
 
                 let contract;
                 if (this.currency.key == "LINA") {
@@ -534,6 +531,7 @@ export default {
 
                 this.currency.balance = bn2n(balance, 4);
             } catch (error) {
+                this.swapNumber = null;
                 console.log(error, "getCurrencyBalance error");
             } finally {
                 this.processing = false;

@@ -8,7 +8,12 @@ import {
 } from "../constants/currency";
 import currencies from "@/common/currency";
 import { formatNumber, formatEtherToNumber } from "../format";
-import { isBinanceNetwork, isEthereumNetwork, WALLET_STATUS } from "../network";
+import {
+    isBinanceNetwork,
+    isEthDevNetwork,
+    isEthereumNetwork,
+    WALLET_STATUS
+} from "../network";
 import config from "@/config/common";
 import api from "@/api";
 import { n2bn, bn2n, bnMul, bnAdd } from "@/common/bnCalc";
@@ -53,9 +58,11 @@ export const getLiquids = async (wallet, all = false) => {
         const walletNetworkId = $nuxt.$store.state.walletNetworkId;
         const isEthereum = isEthereumNetwork(walletNetworkId);
 
-        let priceFunc = getPriceRates(assetKeys);
+        let priceFunc;
         if (isEthereum) {
             priceFunc = band.pricesLast({ sources: assetKeys });
+        } else {
+            priceFunc = getPriceRates(assetKeys);
         }
 
         //获取汇总数据
@@ -74,6 +81,8 @@ export const getLiquids = async (wallet, all = false) => {
             if (!all && balance.isZero()) {
                 continue;
             }
+
+            !price && (price = n2bn("0"));
 
             const value = bnMul(balance, price);
             liquidsData.liquidsList.push({
@@ -112,67 +121,36 @@ export const getPriceRates = async currency => {
     const isEthereum = isEthereumNetwork(walletNetworkId);
     const isBinance = isBinanceNetwork(walletNetworkId);
 
-    const rates = {};
+    let rates = {};
     const { utils } = lnrJSConnector;
 
-    let contract;
+    let contract,
+        pricesPromise = [];
     if (isEthereum) {
-        contract = lnrJSConnector.lnrJS.LnChainLinkPrices;
+        rates = await band.pricesLast({ sources: currency });
     } else if (isBinance) {
         contract = lnrJSConnector.lnrJS.LnBandProtocol;
-    }
-
-    let pricesPromise = [];
-
-    if (_.isString(currency)) {
-        if (
-            ["ETH", "BNB"].includes(currency) ||
-            (isEthereum && currency == "LINA")
-        ) {
-            const id = CRYPTO_CURRENCIES_API[currency]?.id;
-            const results = await api.getTokenPrice({
-                tokenid: [id]
-            });
-            rates[currency] = n2bn(results[id]?.usd);
-        } else {
+        if (_.isString(currency)) {
+            ["ETH", "BNB"].includes(currency) && (currency = "l" + currency);
             rates[currency] = await contract.getPrice(
                 utils.formatBytes32String(currency)
             );
-        }
-    } else if (_.isArray(currency)) {
-        for (let index = 0; index < currency.length; index++) {
-            const name = currency[index];
-            if (
-                ["ETH", "BNB"].includes(name) ||
-                (isEthereum && name == "LINA")
-            ) {
-                const id = CRYPTO_CURRENCIES_API[name]?.id;
-                pricesPromise.push(
-                    api.getTokenPrice({
-                        tokenid: [id]
-                    })
-                );
-            } else {
+        } else if (_.isArray(currency)) {
+            for (let index = 0; index < currency.length; index++) {
+                let name = currency[index];
+                ["ETH", "BNB"].includes(name) && (name = "l" + name);
                 pricesPromise.push(
                     contract.getPrice(utils.formatBytes32String(name))
                 );
             }
-        }
 
-        let prices = await Promise.all(pricesPromise);
-        for (let index = 0; index < currency.length; index++) {
-            const name = currency[index];
-            let price = prices[index];
+            let prices = await Promise.all(pricesPromise);
 
-            if (
-                ["ETH", "BNB"].includes(name) ||
-                (isEthereum && name == "LINA")
-            ) {
-                const id = CRYPTO_CURRENCIES_API[name]?.id;
-                price = n2bn(price[id]?.usd);
+            for (let index = 0; index < currency.length; index++) {
+                const name = currency[index];
+                let price = prices[index];
+                rates[name] = price;
             }
-
-            rates[name] = price;
         }
     }
 
@@ -254,11 +232,11 @@ export const storeDetailsData = async () => {
             const walletNetworkId = store.state.walletNetworkId;
             const isEthereum = isEthereumNetwork(walletNetworkId);
             const isBinance = isBinanceNetwork(walletNetworkId);
-
-            let LnProxy = lnrJSConnector.lnrJS.LinearFinance;
+            const isEthDev = isEthDevNetwork(walletNetworkId);
 
             const {
                 lnrJS: {
+                    LinearFinance,
                     LnCollateralSystem,
                     lUSD,
                     LnDebtSystem,
@@ -268,30 +246,40 @@ export const storeDetailsData = async () => {
                 provider
             } = lnrJSConnector;
 
-            //可以直接转换数值的组
-            const result = await Promise.all([
-                LnCollateralSystem.GetUserTotalCollateralInUsd(walletAddress),
-                getBuildRatio(),
-                LnProxy.balanceOf(walletAddress),
-                LnCollateralSystem.userCollateralData(
-                    walletAddress,
-                    utils.formatBytes32String("LINA")
-                ),
-                LnRewardLocker.balanceOf(walletAddress),
+            let promiseArray = [
+                LinearFinance.balanceOf(walletAddress),
                 lUSD.balanceOf(walletAddress),
-                provider.getBalance(walletAddress),
-                LnDebtSystem.GetUserDebtBalanceInUsd(walletAddress)
-            ]);
+                provider.getBalance(walletAddress)
+            ];
 
-            const [
-                totalCollateralInUsd,
-                buildRatio,
+            if (!isEthDev) {
+                promiseArray = [
+                    ...promiseArray,
+                    LnCollateralSystem.userCollateralData(
+                        walletAddress,
+                        utils.formatBytes32String("LINA")
+                    ),
+                    LnCollateralSystem.GetUserTotalCollateralInUsd(
+                        walletAddress
+                    ),
+                    LnDebtSystem.GetUserDebtBalanceInUsd(walletAddress),
+                    LnRewardLocker.balanceOf(walletAddress),
+                    getBuildRatio()
+                ];
+            }
+
+            //可以直接转换数值的组
+            const result = await Promise.all(promiseArray);
+
+            let [
                 avaliableLINA,
-                stakedLINA,
-                lockLINA,
                 amountlUSD,
                 amountETH,
-                amountDebt
+                stakedLINA,
+                totalCollateralInUsd,
+                amountDebt,
+                lockLINA,
+                buildRatio
             ] = result.map(formatEtherToNumber);
 
             let liquidsData = await getLiquids(walletAddress);
@@ -300,14 +288,23 @@ export const storeDetailsData = async () => {
             const priceRates = await getPriceRates(CRYPTO_CURRENCIES);
             // const priceRates = await getPriceRatesFromApi(CRYPTO_CURRENCIES);
 
-            // console.log(priceRates,'priceRates');
             const LINA2USDRate = priceRates.LINA / 1e18 || 0;
             const lUSD2USDRate = priceRates.lUSD / 1e18 || 1;
             const ETH2USDRate =
                 (isEthereum ? priceRates.ETH : isBinance ? priceRates.BNB : 1) /
                     1e18 || 1;
 
-            const currentRatioPercent =
+            let amountDebt2USD;
+            if (isEthDev) {
+                amountDebt2USD = 0;
+                stakedLINA = lockLINA = totalCollateralInUsd = n2bn("0");
+                buildRatio = 0.2;
+                amountDebt = [n2bn("0")];
+            } else {
+                amountDebt2USD = amountDebt[0] * lUSD2USDRate;
+            }
+
+            let currentRatioPercent =
                 totalCollateralInUsd != 0 && amountDebt[0] != 0
                     ? (totalCollateralInUsd / amountDebt[0]) * 100
                     : 0;
@@ -318,7 +315,6 @@ export const storeDetailsData = async () => {
             const amountlUSD2USD = amountlUSD * lUSD2USDRate;
             const amountETH2USD = amountETH * ETH2USDRate;
             const liquids2USD = formatEtherToNumber(liquidsData.liquids);
-            const amountDebt2USD = amountDebt[0] * lUSD2USDRate;
 
             const totalCryptoBalanceInUSD =
                 amountETH2USD +
